@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qikan.dao.CheckUpMapper" >
+  <resultMap id="BaseResultMap" type="com.qikan.entitys.CheckUp" >
+    <id column="cheekId" property="cheekid" jdbcType="INTEGER" />
+    <result column="expertenddate" property="expertenddate" jdbcType="VARCHAR" />
+    <result column="ischeck" property="ischeck" jdbcType="INTEGER" />
+    <result column="adminMessage" property="adminmessage" jdbcType="INTEGER" />
+    <result column="adminStatus" property="adminstatus" jdbcType="INTEGER" />
+
+    <association property="articleInfo" column="articleId" select="com.qikan.dao.ArticleInfoMapper.selectByArticleId"></association>
+
+    <association property="expertInfo" column="expertid" select="com.qikan.dao.UserInfoMapper.getUserById"></association>
+
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.qikan.entitys.CheckUpWithBLOBs" extends="BaseResultMap" >
+    <result column="expertMessage" property="expertmessage" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    cheekId, articleId, expertId, expertenddate, ischeck, adminMessage, adminStatus
+  </sql>
+  <sql id="Blob_Column_List" >
+    expertMessage
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_checkup
+    where cheekId = #{cheekid,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByArticleId" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_checkup
+    where articleId = #{articleId}
+  </select>
+
+
+  <!-- 查询专家未审核稿件(专家未审核) -->
+  <select id="getExpertUnCheck" resultMap="ResultMapWithBLOBs" parameterType="com.qikan.entitys.CheckDto" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_checkup
+    where ischeck = 1
+    <if test="expertInfo.userid != null">
+      and expertId= #{expertInfo.userid}
+    </if>
+    <if test="pc != null">
+      limit #{pc}
+    </if>
+    <if test="ps != null">
+      , #{ps}
+    </if>
+  </select>
+
+  <!-- 查询专家未审核稿件(专家未审核) -->
+  <select id="getExpertCheck" resultMap="ResultMapWithBLOBs" parameterType="com.qikan.entitys.CheckDto" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_checkup
+    where ischeck = 0
+    <if test="expertInfo.userid != null">
+      and expertId= #{expertInfo.userid}
+    </if>
+    <if test="pc != null">
+      limit #{pc}
+    </if>
+    <if test="ps != null">
+      , #{ps}
+    </if>
+  </select>
+
+  <!-- 查询已分派稿件(分派专家未递交主编) -->
+  <select id="getSend" resultMap="ResultMapWithBLOBs" parameterType="com.qikan.entitys.CheckDto" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_checkup
+    where adminStatus = 1
+    <if test="pc != null">
+      limit #{pc}
+    </if>
+    <if test="ps != null">
+      , #{ps}
+    </if>
+  </select>
+
+  <!-- 查询主编未审核稿件 -->
+  <select id="getAdminUnRead" resultMap="ResultMapWithBLOBs" parameterType="com.qikan.entitys.CheckDto" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_checkup
+    where adminStatus = 0
+    <if test="pc != null">
+      limit #{pc}
+    </if>
+    <if test="ps != null">
+      , #{ps}
+    </if>
+  </select>
+
+  <!-- 查询主编已审核稿件 -->
+  <select id="getAdminRead" resultMap="ResultMapWithBLOBs" parameterType="com.qikan.entitys.CheckDto" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_checkup
+    where adminStatus = 2
+    <if test="pc != null">
+      limit #{pc}
+    </if>
+    <if test="ps != null">
+      , #{ps}
+    </if>
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_checkup
+    where cheekId = #{cheekid,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.qikan.entitys.CheckUpWithBLOBs" >
+    insert into t_checkup (cheekId, articleId, expertId, 
+      expertenddate, ischeck, adminMessage, adminStatus,
+      expertMessage)
+    values (#{cheekid,jdbcType=INTEGER}, #{articleInfo.articleid}, #{expertInfo.userid},
+      #{expertenddate,jdbcType=VARCHAR}, #{ischeck,jdbcType=INTEGER}, #{adminMessage,jdbcType=INTEGER}, #{adminstatus,jdbcType=INTEGER},
+      #{expertmessage,jdbcType=LONGVARCHAR})
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.qikan.entitys.CheckUpWithBLOBs" >
+    insert into t_checkup
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="cheekid != null" >
+        cheekId,
+      </if>
+      <if test="articleInfo != null" >
+        articleId,
+      </if>
+      <if test="expertInfo != null" >
+        expertId,
+      </if>
+      <if test="expertenddate != null" >
+        expertenddate,
+      </if>
+      <if test="ischeck != null" >
+        ischeck,
+      </if>
+      <if test="adminMessage != null" >
+        adminMessage,
+      </if>
+      <if test="adminstatus != null" >
+        adminStatus,
+      </if>
+      <if test="expertmessage != null" >
+        expertMessage,
+      </if>
+
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="cheekid != null" >
+        #{cheekid,jdbcType=INTEGER},
+      </if>
+      <if test="articleInfo != null" >
+        #{articleInfo.articleid},
+      </if>
+      <if test="expertInfo != null" >
+        #{expertInfo.userid},
+      </if>
+      <if test="expertenddate != null" >
+        #{expertenddate,jdbcType=VARCHAR},
+      </if>
+      <if test="ischeck != null" >
+        #{ischeck,jdbcType=INTEGER},
+      </if>
+      <if test="adminMessage != null" >
+        #{adminMessage,jdbcType=INTEGER},
+      </if>
+      <if test="adminstatus != null" >
+        #{adminstatus,jdbcType=INTEGER},
+      </if>
+      <if test="expertmessage != null" >
+        #{expertmessage,jdbcType=LONGVARCHAR},
+      </if>
+
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.qikan.entitys.CheckUpWithBLOBs" >
+    update t_checkup
+    <set >
+      <if test="articleInfo != null" >
+        articleId = #{articleInfo.articleid,jdbcType=INTEGER},
+      </if>
+      <if test="expertInfo != null" >
+        expertId = #{expertInfo.expertid,jdbcType=INTEGER},
+      </if>
+      <if test="expertenddate != null" >
+        expertenddate = #{expertenddate,jdbcType=VARCHAR},
+      </if>
+      <if test="ischeck != null" >
+        ischeck = #{ischeck,jdbcType=INTEGER},
+      </if>
+      <if test="adminMessage != null" >
+        adminMessage = #{adminMessage,jdbcType=INTEGER},
+      </if>
+      <if test="adminstatus != null" >
+        adminStatus = #{adminstatus,jdbcType=INTEGER},
+      </if>
+      <if test="expertmessage != null" >
+        expertMessage = #{expertmessage,jdbcType=LONGVARCHAR},
+      </if>
+
+    </set>
+    where cheekId = #{cheekid,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.qikan.entitys.CheckUpWithBLOBs" >
+    update t_checkup
+    set articleId = #{articleInfo.articleid},
+      expertId = #{expertInfo.expertid},
+      expertenddate = #{expertenddate,jdbcType=VARCHAR},
+      ischeck = #{ischeck,jdbcType=INTEGER},
+      adminMessage = #{adminMessage,jdbcType=INTEGER},
+      adminStatus = #{adminstatus,jdbcType=INTEGER},
+      expertMessage = #{expertmessage,jdbcType=LONGVARCHAR}
+    where cheekId = #{cheekid,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.qikan.entitys.CheckUp" >
+    update t_checkup
+    set articleId = #{articleInfo.articleid},
+      expertId = #{expertInfo.expertid},
+      expertenddate = #{expertenddate,jdbcType=VARCHAR},
+      ischeck = #{ischeck,jdbcType=INTEGER},
+      adminMessage = #{adminMessage,jdbcType=INTEGER},
+      adminStatus = #{adminstatus,jdbcType=INTEGER}
+    where cheekId = #{cheekid,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByArticleId" parameterType="com.qikan.entitys.CheckUp" >
+    update t_checkup
+    set
+     <if test="ischeck != null">
+       ischeck = #{ischeck}
+     </if>
+    <if test="adminMessage != null">
+      adminMessage = #{adminMessage}
+    </if>
+    <if test="adminStatus != null">
+      adminStatus = #{adminStatus}
+    </if>
+    where articleId = #{articleId}
+  </update>
+
+</mapper>

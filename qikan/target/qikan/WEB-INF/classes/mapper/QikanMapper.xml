@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qikan.dao.QikanMapper">
+  <resultMap id="BaseResultMap" type="com.qikan.entitys.Qikan">
+    <id column="qikanId" jdbcType="INTEGER" property="qikanid" />
+    <result column="qikanName" jdbcType="VARCHAR" property="qikanname" />
+    <result column="competentUnit" jdbcType="VARCHAR" property="competentunit" />
+    <result column="hostUnit" jdbcType="VARCHAR" property="hostunit" />
+    <result column="issn" jdbcType="VARCHAR" property="issn" />
+    <result column="cn" jdbcType="VARCHAR" property="cn" />
+    <result column="temail" jdbcType="VARCHAR" property="temail" />
+    <result column="readTime" jdbcType="VARCHAR" property="readtime" />
+    <result column="image" jdbcType="VARCHAR" property="image" />
+    <result column="jibie" jdbcType="CHAR" property="jibie" />
+    
+    <association property="type" column="typeId"
+        select="com.qikan.dao.TypeMapper.selectTypeById">
+    </association>
+    
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    qikanId, qikanName, competentUnit, hostUnit, issn, cn, temail, readTime, image, type,
+    jibie
+  </sql>
+
+  <select id="getQikanCount" parameterType="Integer" resultType="Integer">
+    select count(*) from t_qikan where typeId = #{typeId}
+  </select>
+
+  <select id="getQikanList" resultMap="BaseResultMap">
+    select * from t_qikan limit 0,3
+  </select>
+
+  <select id="getIndex" parameterType="Integer" resultMap="BaseResultMap">
+    select *
+    from t_qikan where typeId=#{typeId}
+  </select>
+
+  <select id="getIndex6" parameterType="Integer" resultMap="BaseResultMap">
+    select *
+    from t_qikan where typeId=#{typeId} limit 0,6
+  </select>
+
+  <select id="getIndex8" parameterType="Integer" resultMap="BaseResultMap">
+    select *
+    from t_qikan where typeId=#{typeId} limit 0,8
+  </select>
+
+  <select id="getIndex10" parameterType="Integer" resultMap="BaseResultMap">
+    select *
+    from t_qikan where typeId=#{typeId} limit #{pc},10
+  </select>
+
+  <select id="selectByQikanId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select *
+    from t_qikan
+    where qikanId = #{qikanid,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByQikanId" parameterType="java.lang.Integer">
+    delete from t_qikan
+    where qikanId = #{qikanid,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="addQikan" parameterType="com.qikan.entitys.Qikan">
+    insert into t_qikan (qikanName, competentUnit,
+      hostUnit, issn, cn, 
+      temail, readTime, image, 
+      typeId, jibie)
+    values (#{qikanname,jdbcType=VARCHAR}, #{competentunit,jdbcType=VARCHAR},
+      #{hostunit,jdbcType=VARCHAR}, #{issn,jdbcType=VARCHAR}, #{cn,jdbcType=VARCHAR}, 
+      #{temail,jdbcType=VARCHAR}, #{readtime,jdbcType=VARCHAR}, #{image,jdbcType=VARCHAR}, 
+      #{type.typeId}, #{jibie,jdbcType=CHAR})
+  </insert>
+
+  <update id="updateByQikanId" parameterType="com.qikan.entitys.Qikan">
+    update t_qikan
+    set qikanName = #{qikanname,jdbcType=VARCHAR},
+      competentUnit = #{competentunit,jdbcType=VARCHAR},
+      hostUnit = #{hostunit,jdbcType=VARCHAR},
+      issn = #{issn,jdbcType=VARCHAR},
+      cn = #{cn,jdbcType=VARCHAR},
+      temail = #{temail,jdbcType=VARCHAR},
+      readTime = #{readtime,jdbcType=VARCHAR},
+      image = #{image,jdbcType=VARCHAR},
+      typeId = #{typeid,jdbcType=CHAR},
+      jibie = #{jibie,jdbcType=CHAR}
+    where qikanId = #{qikanid,jdbcType=INTEGER}
+  </update>
+
+</mapper>

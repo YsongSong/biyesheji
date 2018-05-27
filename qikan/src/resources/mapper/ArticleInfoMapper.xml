@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qikan.dao.ArticleInfoMapper" >
+  <resultMap id="BaseResultMap" type="com.qikan.entitys.ArticleInfo" >
+    <id column="articleId" property="articleid" jdbcType="INTEGER" />
+    <result column="articleCNTitle" property="articlecntitle" jdbcType="VARCHAR" />
+    <result column="articleENTitle" property="articleentitle" jdbcType="VARCHAR" />
+    <result column="articleCNSummary" property="articlecnsummary" jdbcType="VARCHAR" />
+    <result column="articleENSummary" property="articleensummary" jdbcType="VARCHAR" />
+    <result column="articleCNKeywords" property="articlecnkeywords" jdbcType="VARCHAR" />
+    <result column="articleENKeywords" property="articleenkeywords" jdbcType="VARCHAR" />
+    <result column="receiveArticleTime" property="receivearticletime" jdbcType="VARCHAR" />
+    <result column="readArticleTime" property="readarticletime" jdbcType="VARCHAR" />
+    <result column="updateArticleTime" property="updatearticletime" jdbcType="VARCHAR" />
+    <result column="editorStatus" property="editorstatus" jdbcType="INTEGER" />
+    <result column="articleStatus" property="articlestatus" jdbcType="INTEGER" />
+    <result column="publishTime" property="publishtime" jdbcType="VARCHAR" />
+    <result column="articlePath" property="articlepath" jdbcType="VARCHAR" />
+
+    <association property="qikan" column="qikanId" select="com.qikan.dao.QikanMapper.selectByQikanId"></association>
+
+    <association property="author" column="authorId" select="com.qikan.dao.UserInfoMapper.getUserById"></association>
+
+    <association property="expert" column="expertId" select="com.qikan.dao.UserInfoMapper.getUserById"></association>
+
+
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    articleId, articleCNTitle, articleENTitle, articleCNSummary, articleENSummary, articleCNKeywords, 
+    articleENKeywords, qikanId, receiveArticleTime, readArticleTime, updateArticleTime, 
+    editorStatus, articleStatus, publishTime, authorId, expertId, articlePath
+  </sql>
+
+
+  <select id="selectByArticleId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_articleinfo
+    where articleId = #{articleid,jdbcType=INTEGER}
+  </select>
+
+  <!-- 查询退稿稿件 -->
+  <select id="getTuiGao" resultMap="BaseResultMap" parameterType="com.qikan.entitys.UserInfoDto">
+    select * from t_articleinfo where articleStatus = 2
+    <if test="userid != null">
+      and authorId = #{userid}
+    </if>
+    <if test="pc != null">
+      limit #{pc}
+    </if>
+    <if test="ps != null">
+      , #{ps}
+    </if>
+  </select>
+
+  <select id="getUnSendArticle" resultMap="BaseResultMap">
+    select * from t_articleinfo where editorStatus = 0
+    <if test="pc != null">
+      limit #{pc}
+    </if>
+    <if test="ps != null">
+      , #{ps}
+    </if>
+  </select>
+
+  <select id="getSendArticle" resultMap="BaseResultMap">
+    select * from t_articleinfo where editorStatus = 1
+    <if test="pc != null">
+      limit #{pc}
+    </if>
+    <if test="ps != null">
+      , #{ps}
+    </if>
+  </select>
+
+
+  <!-- 状态不为 2 即为  审核中 或 待处理 (即未审核完) 为0说明未分配专家 为1说明已分配专家 -->
+  <select id="getUnCheckArticle" resultMap="BaseResultMap" parameterType="com.qikan.entitys.UserInfoDto">
+    select * from t_articleinfo where editorStatus != 2
+    <if test="userid != null">
+      and authorId = #{userid}
+    </if>
+    <if test="pc != null">
+      limit #{pc}
+    </if>
+    <if test="ps != null">
+      , #{ps}
+    </if>
+  </select>
+
+  <!-- 状态为 2 即为 已审核 且处于未发表状态(articleStatus = 0) -->
+  <select id="getCheckArticle" resultMap="BaseResultMap" parameterType="com.qikan.entitys.UserInfoDto">
+    select * from t_articleinfo where editorStatus = 2 and articleStatus != 1
+    <if test="userid != null">
+      and authorId = #{userid}
+    </if>
+    <if test="pc != null">
+      limit #{pc}
+    </if>
+    <if test="ps != null">
+      , #{ps}
+    </if>
+  </select>
+
+  <!-- 若articleStatus = 2 为退稿, articleStatus = 1 为 已发表 articleStatus = 0 为未发表 -->
+  <select id="getPublishArticle" resultMap="BaseResultMap" parameterType="com.qikan.entitys.UserInfoDto">
+    select * from t_articleinfo where articleStatus = 1
+    <if test="userid != null">
+      and authorId = #{userid}
+    </if>
+    <if test="pc != null">
+      limit #{pc}
+    </if>
+    <if test="ps != null">
+      , #{ps}
+    </if>
+  </select>
+
+  <select id="getUnPublishArticle" resultMap="BaseResultMap" parameterType="com.qikan.entitys.UserInfoDto">
+    select * from t_articleinfo where articleStatus = 0
+    <if test="userid != null">
+      and authorId = #{userid}
+    </if>
+    <if test="pc != null">
+      limit #{pc}
+    </if>
+    <if test="ps != null">
+      , #{ps}
+    </if>
+  </select>
+
+  <delete id="deleteByArticleId" parameterType="java.lang.Integer" >
+    delete from t_articleinfo
+    where articleId = #{articleid,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.qikan.entitys.ArticleInfo" >
+    insert into t_articleinfo (articleId, articleCNTitle, articleENTitle, 
+      articleCNSummary, articleENSummary, articleCNKeywords, 
+      articleENKeywords, qikanId, receiveArticleTime, 
+      readArticleTime, updateArticleTime, editorStatus, 
+      articleStatus, publishTime, authorId, 
+      expertId, articlePath)
+    values (#{articleid,jdbcType=INTEGER}, #{articlecntitle,jdbcType=VARCHAR}, #{articleentitle,jdbcType=VARCHAR}, 
+      #{articlecnsummary,jdbcType=VARCHAR}, #{articleensummary,jdbcType=VARCHAR}, #{articlecnkeywords,jdbcType=VARCHAR}, 
+      #{articleenkeywords,jdbcType=VARCHAR}, #{qikan.qikanid}, #{receivearticletime,jdbcType=VARCHAR},
+      #{readarticletime,jdbcType=VARCHAR}, #{updatearticletime,jdbcType=VARCHAR}, #{editorstatus,jdbcType=INTEGER}, 
+      #{articlestatus,jdbcType=INTEGER}, #{publishtime,jdbcType=VARCHAR}, #{author.authorid},
+      #{expert.expertid}, #{articlepath,jdbcType=VARCHAR})
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.qikan.entitys.ArticleInfo" >
+    insert into t_articleinfo
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="articleid != null" >
+        articleId,
+      </if>
+      <if test="articlecntitle != null" >
+        articleCNTitle,
+      </if>
+      <if test="articleentitle != null" >
+        articleENTitle,
+      </if>
+      <if test="articlecnsummary != null" >
+        articleCNSummary,
+      </if>
+      <if test="articleensummary != null" >
+        articleENSummary,
+      </if>
+      <if test="articlecnkeywords != null" >
+        articleCNKeywords,
+      </if>
+      <if test="articleenkeywords != null" >
+        articleENKeywords,
+      </if>
+      <if test="qikan != null" >
+        qikanId,
+      </if>
+      <if test="receivearticletime != null" >
+        receiveArticleTime,
+      </if>
+      <if test="readarticletime != null" >
+        readArticleTime,
+      </if>
+      <if test="updatearticletime != null" >
+        updateArticleTime,
+      </if>
+      <if test="editorstatus != null" >
+        editorStatus,
+      </if>
+      <if test="articlestatus != null" >
+        articleStatus,
+      </if>
+      <if test="publishtime != null" >
+        publishTime,
+      </if>
+      <if test="author != null" >
+        authorId,
+      </if>
+      <if test="expert != null" >
+        expertId,
+      </if>
+      <if test="articlepath != null" >
+        articlePath,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="articleid != null" >
+        #{articleid,jdbcType=INTEGER},
+      </if>
+      <if test="articlecntitle != null" >
+        #{articlecntitle,jdbcType=VARCHAR},
+      </if>
+      <if test="articleentitle != null" >
+        #{articleentitle,jdbcType=VARCHAR},
+      </if>
+      <if test="articlecnsummary != null" >
+        #{articlecnsummary,jdbcType=VARCHAR},
+      </if>
+      <if test="articleensummary != null" >
+        #{articleensummary,jdbcType=VARCHAR},
+      </if>
+      <if test="articlecnkeywords != null" >
+        #{articlecnkeywords,jdbcType=VARCHAR},
+      </if>
+      <if test="articleenkeywords != null" >
+        #{articleenkeywords,jdbcType=VARCHAR},
+      </if>
+      <if test="qikan != null" >
+        #{qikan.qikanid},
+      </if>
+      <if test="receivearticletime != null" >
+        #{receivearticletime,jdbcType=VARCHAR},
+      </if>
+      <if test="readarticletime != null" >
+        #{readarticletime,jdbcType=VARCHAR},
+      </if>
+      <if test="updatearticletime != null" >
+        #{updatearticletime,jdbcType=VARCHAR},
+      </if>
+      <if test="editorstatus != null" >
+        #{editorstatus,jdbcType=INTEGER},
+      </if>
+      <if test="articlestatus != null" >
+        #{articlestatus,jdbcType=INTEGER},
+      </if>
+      <if test="publishtime != null" >
+        #{publishtime,jdbcType=VARCHAR},
+      </if>
+      <if test="author != null" >
+        #{author.userid},
+      </if>
+      <if test="expert != null" >
+        #{expert.expertid},
+      </if>
+      <if test="articlepath != null" >
+        #{articlepath,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByArticleIdSelective" parameterType="com.qikan.entitys.ArticleInfo" >
+    update t_articleinfo
+    <set >
+      <if test="articlecntitle != null" >
+        articleCNTitle = #{articlecntitle,jdbcType=VARCHAR},
+      </if>
+      <if test="articleentitle != null" >
+        articleENTitle = #{articleentitle,jdbcType=VARCHAR},
+      </if>
+      <if test="articlecnsummary != null" >
+        articleCNSummary = #{articlecnsummary,jdbcType=VARCHAR},
+      </if>
+      <if test="articleensummary != null" >
+        articleENSummary = #{articleensummary,jdbcType=VARCHAR},
+      </if>
+      <if test="articlecnkeywords != null" >
+        articleCNKeywords = #{articlecnkeywords,jdbcType=VARCHAR},
+      </if>
+      <if test="articleenkeywords != null" >
+        articleENKeywords = #{articleenkeywords,jdbcType=VARCHAR},
+      </if>
+      <if test="qikan != null" >
+        qikanId = #{qikan.qikanid},
+      </if>
+      <if test="receivearticletime != null" >
+        receiveArticleTime = #{receivearticletime,jdbcType=VARCHAR},
+      </if>
+      <if test="readarticletime != null" >
+        readArticleTime = #{readarticletime,jdbcType=VARCHAR},
+      </if>
+      <if test="updatearticletime != null" >
+        updateArticleTime = #{updatearticletime,jdbcType=VARCHAR},
+      </if>
+      <if test="editorstatus != null" >
+        editorStatus = #{editorstatus,jdbcType=INTEGER},
+      </if>
+      <if test="articlestatus != null" >
+        articleStatus = #{articlestatus,jdbcType=INTEGER},
+      </if>
+      <if test="publishtime != null" >
+        publishTime = #{publishtime,jdbcType=VARCHAR},
+      </if>
+      <if test="author != null" >
+        authorId = #{author.userid},
+      </if>
+      <if test="expert != null" >
+        expertId = #{expert.userid},
+      </if>
+      <if test="articlepath != null" >
+        articlePath = #{articlepath,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where articleId = #{articleid,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByArticleId" parameterType="com.qikan.entitys.ArticleInfo" >
+    update t_articleinfo
+    set articleCNTitle = #{articlecntitle,jdbcType=VARCHAR},
+      articleENTitle = #{articleentitle,jdbcType=VARCHAR},
+      articleCNSummary = #{articlecnsummary,jdbcType=VARCHAR},
+      articleENSummary = #{articleensummary,jdbcType=VARCHAR},
+      articleCNKeywords = #{articlecnkeywords,jdbcType=VARCHAR},
+      articleENKeywords = #{articleenkeywords,jdbcType=VARCHAR},
+      qikanId = #{qikan.qikanid},
+      receiveArticleTime = #{receivearticletime,jdbcType=VARCHAR},
+      readArticleTime = #{readarticletime,jdbcType=VARCHAR},
+      updateArticleTime = #{updatearticletime,jdbcType=VARCHAR},
+      editorStatus = #{editorstatus,jdbcType=INTEGER},
+      articleStatus = #{articlestatus,jdbcType=INTEGER},
+      publishTime = #{publishtime,jdbcType=VARCHAR},
+      authorId = #{author.authorid},
+      expertId = #{expert.expertid},
+      articlePath = #{articlepath,jdbcType=VARCHAR}
+    where articleId = #{articleid,jdbcType=INTEGER}
+  </update>
+
+</mapper>

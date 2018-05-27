@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qikan.dao.NoticeMapper" >
+  <resultMap id="BaseResultMap" type="com.qikan.entitys.Notice" >
+    <id column="noticeId" property="noticeid" jdbcType="INTEGER" />
+    <result column="noticeTitle" property="noticetitle" jdbcType="VARCHAR" />
+    <result column="noticeTime" property="noticetime" jdbcType="VARCHAR" />
+
+    <association property="type" column="typeId"
+                 select="com.qikan.dao.TypeMapper.selectTypeById">
+    </association>
+
+  </resultMap>
+
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.qikan.entitys.NoticeWithBLOBs">
+    <result column="noticeContent" jdbcType="LONGVARCHAR" property="noticecontent" />
+    <result column="noticeText" jdbcType="LONGVARCHAR" property="noticetext" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    noticeId, noticeTitle, typeId, noticeTime
+  </sql>
+  <sql id="Blob_Column_List">
+    noticeContent, noticeText
+  </sql>
+
+
+  <select id="getNoticeListByTypeId" parameterType="Integer"  resultMap="BaseResultMap">
+    select * from t_notice where typeId=#{typeId} order by noticeTime desc limit 0,10
+  </select>
+
+
+
+  <select id="selectByNoticeId" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_notice
+    where noticeId = #{noticeid,jdbcType=INTEGER}
+  </select>
+
+  <select id="query" resultMap="BaseResultMap">
+    select * from t_notice
+  </select>
+
+  <delete id="deleteByNoticeId" parameterType="java.lang.Integer" >
+    delete from t_notice
+    where noticeId = #{noticeid,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.qikan.entitys.NoticeWithBLOBs" >
+    insert into t_notice (noticeTitle, typeId,
+      noticeTime, noticeContent, noticetext)
+    values (#{noticetitle,jdbcType=VARCHAR}, #{type.typeid},
+      #{noticetime,jdbcType=VARCHAR}, #{noticecontent,jdbcType=LONGVARCHAR}, #{noticetext,jdbcType=LONGVARCHAR})
+  </insert>
+
+  <update id="updateByNoticeId" parameterType="com.qikan.entitys.NoticeWithBLOBs" >
+    update t_notice
+    set noticeTitle = #{noticetitle,jdbcType=VARCHAR},
+      typeId = #{type.typeId}, noticecontent = #{noticecontent,jdbcType=LONGVARCHAR}
+    where noticeId = #{noticeid,jdbcType=INTEGER}
+  </update>
+
+</mapper>

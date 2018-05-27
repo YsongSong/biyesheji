@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/biyesheji.iml" filepath="$PROJECT_DIR$/biyesheji.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jodconverter-core/jodconvertercore.iml" filepath="$PROJECT_DIR$/jodconverter-core/jodconvertercore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/qikan/qikan.iml" filepath="$PROJECT_DIR$/qikan/qikan.iml" />
+      <module fileurl="file://$PROJECT_DIR$/wordviewonline/wordviewonline.iml" filepath="$PROJECT_DIR$/wordviewonline/wordviewonline.iml" />
+    </modules>
+  </component>
+</project>
